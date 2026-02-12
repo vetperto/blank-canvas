@@ -37,7 +37,6 @@ import {
 const profileSchema = z.object({
   full_name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
   social_name: z.string().optional(),
-  email: z.string().email('Email inválido'),
   phone: z.string().optional(),
   cpf: z.string().optional(),
   cep: z.string().optional(),
@@ -52,7 +51,7 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 export default function TutorProfile() {
-  const { profile, refreshProfile } = useAuth();
+  const { profile, user, refreshProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
@@ -61,7 +60,6 @@ export default function TutorProfile() {
     defaultValues: {
       full_name: profile?.full_name || '',
       social_name: profile?.social_name || '',
-      email: profile?.email || '',
       phone: profile?.phone || '',
       cpf: profile?.cpf || '',
       cep: profile?.cep || '',
@@ -206,7 +204,7 @@ export default function TutorProfile() {
                   <h2 className="text-xl font-semibold text-foreground">
                     {profile?.social_name || profile?.full_name}
                   </h2>
-                  <p className="text-sm text-muted-foreground">{profile?.email}</p>
+                  <p className="text-sm text-muted-foreground">{user?.email}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Membro desde {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }) : 'N/A'}
                   </p>
@@ -287,27 +285,18 @@ export default function TutorProfile() {
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                              <Input 
-                                placeholder="seu@email.com" 
-                                className="pl-10" 
-                                {...field} 
-                                disabled 
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div>
+                      <label className="text-sm font-medium">Email</label>
+                      <div className="relative mt-2">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input 
+                          value={user?.email || ''} 
+                          className="pl-10" 
+                          disabled 
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Email gerenciado pela autenticação</p>
+                    </div>
                     <FormField
                       control={form.control}
                       name="phone"

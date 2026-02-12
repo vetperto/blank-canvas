@@ -10,7 +10,6 @@ interface Profile {
   user_type: 'tutor' | 'profissional' | 'empresa';
   full_name: string;
   social_name: string | null;
-  email: string;
   phone: string | null;
   cpf: string | null;
   cnpj: string | null;
@@ -181,7 +180,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .from('profiles')
         .insert({
           user_id: authData.user.id,
-          email,
           full_name: profileData.full_name || '',
           user_type: profileData.user_type || 'tutor',
           social_name: profileData.social_name,

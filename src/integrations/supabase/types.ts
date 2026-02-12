@@ -337,6 +337,51 @@ export type Database = {
           },
         ]
       }
+      companies: {
+        Row: {
+          address: string | null
+          cnpj: string | null
+          id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          location: unknown
+          trade_name: string | null
+        }
+        Insert: {
+          address?: string | null
+          cnpj?: string | null
+          id: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          location?: unknown
+          trade_name?: string | null
+        }
+        Update: {
+          address?: string | null
+          cnpj?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          location?: unknown
+          trade_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_transactions: {
         Row: {
           amount: number
@@ -893,6 +938,51 @@ export type Database = {
           },
         ]
       }
+      professionals: {
+        Row: {
+          bio: string | null
+          crmv: string | null
+          id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          location: unknown
+          specialties: string[] | null
+        }
+        Insert: {
+          bio?: string | null
+          crmv?: string | null
+          id: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          location?: unknown
+          specialties?: string[] | null
+        }
+        Update: {
+          bio?: string | null
+          crmv?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          location?: unknown
+          specialties?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professionals_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professionals_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_status: string | null
@@ -1255,6 +1345,45 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      tutors: {
+        Row: {
+          city: string | null
+          cpf: string | null
+          id: string
+          pets_count: number | null
+          state: string | null
+        }
+        Insert: {
+          city?: string | null
+          cpf?: string | null
+          id: string
+          pets_count?: number | null
+          state?: string | null
+        }
+        Update: {
+          city?: string | null
+          cpf?: string | null
+          id?: string
+          pets_count?: number | null
+          state?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutors_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutors_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_notifications: {
         Row: {

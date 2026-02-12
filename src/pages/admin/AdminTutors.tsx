@@ -262,7 +262,7 @@ export default function AdminTutors() {
                         <div className="text-sm">
                           <p className="flex items-center gap-1">
                             <Mail className="w-3 h-3" />
-                            {user.email}
+                            {user.phone || '-'}
                           </p>
                           {user.phone && (
                             <p className="flex items-center gap-1 text-muted-foreground">
@@ -396,7 +396,7 @@ export default function AdminTutors() {
                   <h3 className="text-lg font-semibold">
                     {userDetails.social_name || userDetails.full_name}
                   </h3>
-                  <p className="text-muted-foreground">{userDetails.email}</p>
+                  <p className="text-muted-foreground">{userDetails.phone || '-'}</p>
                 </div>
               </div>
 

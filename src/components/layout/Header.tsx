@@ -93,7 +93,7 @@ export function Header() {
               {profile?.social_name || profile?.full_name}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {profile?.email}
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>

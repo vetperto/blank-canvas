@@ -11,7 +11,6 @@ export interface AdminUser {
   user_id: string;
   full_name: string;
   social_name: string | null;
-  email: string;
   phone: string | null;
   cpf: string | null;
   cnpj: string | null;
@@ -93,7 +92,7 @@ export function useAdminUsers() {
 
         if (filters.search) {
           query = query.or(
-            `full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%,phone.ilike.%${filters.search}%,cpf.ilike.%${filters.search}%`
+            `full_name.ilike.%${filters.search}%,phone.ilike.%${filters.search}%,cpf.ilike.%${filters.search}%`
           );
         }
 
