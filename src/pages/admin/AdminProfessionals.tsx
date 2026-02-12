@@ -308,7 +308,7 @@ export default function AdminProfessionals() {
                         <div className="text-sm">
                           <p className="flex items-center gap-1">
                             <Mail className="w-3 h-3" />
-                            {user.email}
+                            {user.phone || '-'}
                           </p>
                         </div>
                       </TableCell>
@@ -452,7 +452,7 @@ export default function AdminProfessionals() {
                       <BadgeCheck className="w-5 h-5 text-primary" />
                     )}
                   </div>
-                  <p className="text-muted-foreground">{userDetails.email}</p>
+                  <p className="text-muted-foreground">{userDetails.phone || '-'}</p>
                 </div>
               </div>
 

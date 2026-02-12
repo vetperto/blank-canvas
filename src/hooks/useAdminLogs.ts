@@ -78,17 +78,17 @@ export function useAdminLogs() {
         const adminIds = [...new Set(data?.map((log) => log.admin_user_id) || [])];
         const { data: adminProfiles } = await supabase
           .from("profiles")
-          .select("user_id, full_name, email")
+          .select("user_id, full_name")
           .in("user_id", adminIds);
 
         const adminMap = new Map(
-          adminProfiles?.map((p) => [p.user_id, { name: p.full_name, email: p.email }]) || []
+          adminProfiles?.map((p) => [p.user_id, { name: p.full_name }]) || []
         );
 
         const enrichedLogs: AdminLog[] = (data || []).map((log) => ({
           ...log,
           admin_name: adminMap.get(log.admin_user_id)?.name || "Admin",
-          admin_email: adminMap.get(log.admin_user_id)?.email || "",
+          admin_email: "",
         }));
 
         setLogs(enrichedLogs);

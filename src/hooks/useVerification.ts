@@ -13,7 +13,6 @@ export interface ProfessionalVerification {
   id: string;
   full_name: string;
   social_name: string | null;
-  email: string;
   phone: string | null;
   profile_picture_url: string | null;
   user_type: string;
@@ -88,7 +87,6 @@ export function useVerification() {
           id,
           full_name,
           social_name,
-          email,
           phone,
           profile_picture_url,
           user_type,

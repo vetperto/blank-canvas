@@ -48,7 +48,6 @@ import {
 const profileSchema = z.object({
   full_name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
   social_name: z.string().optional(),
-  email: z.string().email('Email inválido'),
   phone: z.string().optional(),
   cpf: z.string().optional(),
   cnpj: z.string().optional(),
@@ -77,7 +76,7 @@ interface Document {
 }
 
 export default function ProfessionalProfile() {
-  const { profile, refreshProfile } = useAuth();
+  const { profile, user, refreshProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isUploadingDoc, setIsUploadingDoc] = useState<string | null>(null);
@@ -89,7 +88,7 @@ export default function ProfessionalProfile() {
     defaultValues: {
       full_name: profile?.full_name || '',
       social_name: profile?.social_name || '',
-      email: profile?.email || '',
+      
       phone: profile?.phone || '',
       cpf: profile?.cpf || '',
       cnpj: profile?.cnpj || '',
@@ -385,7 +384,7 @@ export default function ProfessionalProfile() {
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {profile?.crmv ? `CRMV: ${profile.crmv}` : profile?.email}
+                    {profile?.crmv ? `CRMV: ${profile.crmv}` : user?.email}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {profile?.user_type === 'empresa' ? 'Empresa' : 'Profissional'} desde{' '}
@@ -630,27 +629,18 @@ export default function ProfessionalProfile() {
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                              <Input 
-                                placeholder="seu@email.com" 
-                                className="pl-10" 
-                                {...field} 
-                                disabled 
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div>
+                      <label className="text-sm font-medium">Email</label>
+                      <div className="relative mt-2">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input 
+                          value={user?.email || ''} 
+                          className="pl-10" 
+                          disabled 
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Email gerenciado pela autenticação</p>
+                    </div>
                     <FormField
                       control={form.control}
                       name="phone"

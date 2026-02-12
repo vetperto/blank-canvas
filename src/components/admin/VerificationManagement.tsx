@@ -125,7 +125,6 @@ export function VerificationManagement() {
     const query = searchQuery.toLowerCase();
     return (
       p.full_name.toLowerCase().includes(query) ||
-      p.email.toLowerCase().includes(query) ||
       p.crmv?.toLowerCase().includes(query) ||
       p.city?.toLowerCase().includes(query)
     );
@@ -318,7 +317,7 @@ export function VerificationManagement() {
                           )}
                         </div>
                         
-                        <p className="text-sm text-muted-foreground truncate">{professional.email}</p>
+                        <p className="text-sm text-muted-foreground truncate">{professional.phone || professional.full_name}</p>
                         
                         <div className="flex flex-wrap gap-2 mt-2 text-xs">
                           {professional.crmv && (

@@ -199,17 +199,17 @@ export function useAdmin() {
 
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, full_name, social_name, email")
+        .select("id, full_name, social_name")
         .in("id", profileIds);
 
       const profileMap = new Map(
-        profiles?.map(p => [p.id, { name: p.social_name || p.full_name, email: p.email }]) || []
+        profiles?.map(p => [p.id, { name: p.social_name || p.full_name }]) || []
       );
 
       const enrichedDocs: PendingDocument[] = (documents || []).map(d => ({
         ...d,
         professional_name: profileMap.get(d.profile_id)?.name || "Profissional",
-        professional_email: profileMap.get(d.profile_id)?.email || "",
+        professional_email: "",
       }));
 
       setPendingDocuments(enrichedDocs);

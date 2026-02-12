@@ -76,7 +76,7 @@ const bottomMenuItems = [
 
 export function TutorSidebar() {
   const location = useLocation();
-  const { profile, signOut } = useAuth();
+  const { profile, user, signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
   const isActive = (path: string) => {
@@ -178,7 +178,7 @@ export function TutorSidebar() {
                 {profile?.social_name || profile?.full_name?.split(' ')[0] || 'Usuário'}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {profile?.email}
+                {user?.email}
               </p>
             </div>
           </div>
