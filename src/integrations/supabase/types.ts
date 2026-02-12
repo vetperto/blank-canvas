@@ -876,7 +876,7 @@ export type Database = {
           created_at: string
           crmv: string | null
           email: string
-          full_name: string | null
+          full_name: string
           home_service_radius: number | null
           id: string
           is_featured: boolean | null
@@ -897,7 +897,7 @@ export type Database = {
           terms_accepted_at: string | null
           updated_at: string
           user_id: string
-          user_type: Database["public"]["Enums"]["user_type"] | null
+          user_type: Database["public"]["Enums"]["user_type"]
           verification_notes: string | null
           verification_status:
             | Database["public"]["Enums"]["verification_status"]
@@ -917,7 +917,7 @@ export type Database = {
           created_at?: string
           crmv?: string | null
           email: string
-          full_name?: string | null
+          full_name: string
           home_service_radius?: number | null
           id?: string
           is_featured?: boolean | null
@@ -938,7 +938,7 @@ export type Database = {
           terms_accepted_at?: string | null
           updated_at?: string
           user_id: string
-          user_type?: Database["public"]["Enums"]["user_type"] | null
+          user_type: Database["public"]["Enums"]["user_type"]
           verification_notes?: string | null
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
@@ -958,7 +958,7 @@ export type Database = {
           created_at?: string
           crmv?: string | null
           email?: string
-          full_name?: string | null
+          full_name?: string
           home_service_radius?: number | null
           id?: string
           is_featured?: boolean | null
@@ -979,7 +979,7 @@ export type Database = {
           terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string
-          user_type?: Database["public"]["Enums"]["user_type"] | null
+          user_type?: Database["public"]["Enums"]["user_type"]
           verification_notes?: string | null
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
@@ -1671,19 +1671,28 @@ export type Database = {
         }
         Returns: string
       }
-      search_professionals_by_location: {
-        Args: {
-          search_mode?: string
-          search_radius?: number
-          user_lat: number
-          user_lng: number
-        }
-        Returns: {
-          covers_user_location: boolean
-          distance_km: number
-          profile_id: string
-        }[]
-      }
+      search_professionals_by_location:
+        | {
+            Args: { search_radius?: number; user_lat: number; user_lng: number }
+            Returns: {
+              covers_user_location: boolean
+              distance_km: number
+              profile_id: string
+            }[]
+          }
+        | {
+            Args: {
+              search_mode?: string
+              search_radius?: number
+              user_lat: number
+              user_lng: number
+            }
+            Returns: {
+              covers_user_location: boolean
+              distance_km: number
+              profile_id: string
+            }[]
+          }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
