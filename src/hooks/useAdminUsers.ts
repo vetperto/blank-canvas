@@ -187,15 +187,15 @@ export function useAdminUsers() {
         if (error) throw error;
 
         // Log the action
-        await supabase.from("admin_logs").insert({
+        await supabase.from("admin_logs").insert([{
           admin_user_id: user.id,
           action: "update_user",
           entity_type: "profile",
           entity_id: profileId,
-          old_value: oldData,
-          new_value: { ...oldData, ...updates },
+          old_value: oldData as any,
+          new_value: { ...oldData, ...updates } as any,
           description: reason || `Usuário atualizado`,
-        });
+        }]);
 
         toast.success("Usuário atualizado com sucesso");
         return true;
@@ -301,14 +301,14 @@ export function useAdminUsers() {
           .single();
 
         // Log the action before deletion
-        await supabase.from("admin_logs").insert({
+        await supabase.from("admin_logs").insert([{
           admin_user_id: user.id,
           action: "delete_user",
           entity_type: "profile",
           entity_id: profileId,
-          old_value: userData,
+          old_value: userData as any,
           description: reason,
-        });
+        }]);
 
         // Delete the profile (this should cascade to related data)
         const { error } = await supabase

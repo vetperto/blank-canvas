@@ -153,13 +153,7 @@ export function useCreateReview() {
 
       if (error) throw error;
 
-      // Update appointment with review_id if applicable
-      if (appointmentId && data) {
-        await supabase
-          .from('appointments')
-          .update({ review_id: data.id })
-          .eq('id', appointmentId);
-      }
+      // Review created successfully - appointment link is handled by the review's appointment_id field
 
       return data;
     },
