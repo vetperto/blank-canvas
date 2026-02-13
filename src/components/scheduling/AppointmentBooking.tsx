@@ -168,14 +168,12 @@ export function AppointmentBooking({
     } catch (error: any) {
       console.error('Booking error:', error);
       const msg = error?.message || '';
-      if (msg.includes('crédito') || msg.includes('credit') || msg.includes('Sem créditos')) {
+      if (msg.includes('NO_CREDITS_AVAILABLE')) {
         toast.error('Sem créditos disponíveis', {
-          description: 'O profissional não possui créditos para aceitar novos agendamentos.',
-          action: {
-            label: 'Ver planos',
-            onClick: () => { window.location.href = '/planos'; },
-          },
+          description: 'Você precisa adquirir um novo plano para continuar recebendo agendamentos.',
         });
+        window.location.href = '/planos';
+        return;
       }
       // Other errors already handled by useCreateAppointment's onError
     }
