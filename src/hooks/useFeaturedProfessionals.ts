@@ -30,9 +30,9 @@ export function useFeaturedProfessionals(limit: number = 4) {
       try {
         // Fetch professionals from profiles_public view
         // Criteria: professionals or companies with complete profiles
-        const { data: profiles, error: profilesError } = await supabase
-          .from("profiles_public")
-          .select("*")
+        const { data: profiles, error: profilesError } = await (supabase
+          .from("profiles_public" as any)
+          .select("*") as any)
           .in("user_type", ["profissional", "empresa"])
           .not("full_name", "is", null)
           .not("city", "is", null)
