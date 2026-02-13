@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import type { PetSpecies } from "@/lib/supabase-enums";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -206,7 +207,7 @@ export function PetForm({ pet, open, onOpenChange, onSubmit, isLoading }: PetFor
               <Label>Espécie *</Label>
               <Select
                 value={species}
-                onValueChange={(value) => setValue("species", value as any)}
+                onValueChange={(value: string) => setValue("species", value as PetSpecies)}
               >
                 <SelectTrigger>
                   <SelectValue />

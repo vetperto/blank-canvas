@@ -1,31 +1,10 @@
 import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { SearchFilters, ProfessionalResult } from "@/lib/search/types";
-import type { PublicSearchProfessional } from "@/lib/search/public-professional";
+import type { PublicSearchProfessional, RpcProfessionalResult } from "@/lib/search/public-professional";
 import { applyServiceFilter, applyLocationTypeFilter, applyRatingFilter, applyPaymentFilter, applySorting } from "@/lib/search/filter-pipeline";
 
 export type { SearchFilters, ProfessionalResult };
-
-/** Shape returned by the `search_professionals_by_radius` RPC. */
-interface RpcProfessionalResult {
-  id: string;
-  full_name: string;
-  social_name: string | null;
-  bio: string | null;
-  city: string | null;
-  state: string | null;
-  neighborhood: string | null;
-  profile_picture_url: string | null;
-  average_rating: number | null;
-  total_reviews: number | null;
-  distance_meters: number | null;
-  crmv: string | null;
-  is_verified: boolean | null;
-  payment_methods: string[] | null;
-  latitude: number | null;
-  longitude: number | null;
-  home_service_radius: number | null;
-}
 
 /**
  * Geocode a location string to coordinates using Nominatim.
@@ -211,9 +190,8 @@ export function useSearchProfessionals() {
       if (coordinates) {
         // === GEO SEARCH: Use RPC search_professionals_by_radius ===
         const radiusMeters = (filters.radius || 10) * 1000;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error: rpcError } = await supabase.rpc(
-          'search_professionals_by_radius' as any,
+          'search_professionals_by_radius',
           {
             user_lat: coordinates.lat,
             user_lng: coordinates.lng,
