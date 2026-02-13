@@ -32,7 +32,7 @@ import {
   type ServiceLocationType 
 } from '@/hooks/useAppointments';
 import { useCalendarAvailability } from '@/hooks/useCalendarAvailability';
-import { useCheckProfessionalCredits, useRecordLostAppointment } from '@/hooks/useProfessionalCredits';
+import { useCheckProfessionalCredits } from '@/hooks/useProfessionalCredits';
 import { AnnualCalendar } from './AnnualCalendar';
 import { PetSelectionCard } from '@/components/pets/PetSelectionCard';
 import { CreditExhaustedMessage } from '@/components/credits/CreditExhaustedMessage';
@@ -83,9 +83,8 @@ export function AppointmentBooking({
   );
   const createAppointment = useCreateAppointment();
   
-  // Credit system checks
+  // Credit system checks (read-only, backend controls credits)
   const { data: creditCheck, isLoading: checkingCredits } = useCheckProfessionalCredits(professionalId);
-  const recordLostAppointment = useRecordLostAppointment();
 
   // Fetch tutor's pets
   const { data: pets } = useQuery({
@@ -119,21 +118,15 @@ export function AppointmentBooking({
   };
 
   const handleBooking = async () => {
-    // Check if professional has credits before attempting to book
+    // UI-level credit check (backend is the source of truth and will block if no credits)
     if (!creditCheck?.has_credits) {
-      // Record this as a lost appointment
-      if (profile?.id) {
-        try {
-          await recordLostAppointment.mutateAsync({
-            professionalProfileId: professionalId,
-            tutorProfileId: profile.id,
-            serviceId: selectedService?.id,
-          });
-        } catch (err) {
-          console.error('Error recording lost appointment:', err);
-        }
-      }
-      toast.error('Este profissional está temporariamente indisponível para novos agendamentos.');
+      toast.error('Este profissional está temporariamente indisponível para novos agendamentos.', {
+        description: 'Os créditos do profissional se esgotaram.',
+        action: {
+          label: 'Ver planos',
+          onClick: () => { window.location.href = '/planos'; },
+        },
+      });
       return;
     }
 
@@ -168,13 +161,23 @@ export function AppointmentBooking({
           });
         } catch (notifError) {
           console.error('Error sending notification:', notifError);
-          // Don't fail the booking if notification fails
         }
       }
 
       handleClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Booking error:', error);
+      const msg = error?.message || '';
+      if (msg.includes('crédito') || msg.includes('credit') || msg.includes('Sem créditos')) {
+        toast.error('Sem créditos disponíveis', {
+          description: 'O profissional não possui créditos para aceitar novos agendamentos.',
+          action: {
+            label: 'Ver planos',
+            onClick: () => { window.location.href = '/planos'; },
+          },
+        });
+      }
+      // Other errors already handled by useCreateAppointment's onError
     }
   };
 

@@ -14,7 +14,7 @@ export interface AdminUser {
   phone: string | null;
   cpf: string | null;
   cnpj: string | null;
-  crmv: string | null;
+  crmv?: string | null;
   user_type: UserType;
   account_status: string;
   is_verified: boolean;

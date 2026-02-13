@@ -13,7 +13,6 @@ interface Profile {
   phone: string | null;
   cpf: string | null;
   cnpj: string | null;
-  crmv: string | null;
   cep: string | null;
   street: string | null;
   number: string | null;
@@ -29,6 +28,7 @@ interface Profile {
   terms_accepted: boolean;
   created_at: string;
   updated_at: string;
+  [key: string]: any; // Allow additional fields from DB
 }
 
 interface AuthContextType {

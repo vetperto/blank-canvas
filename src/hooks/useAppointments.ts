@@ -223,7 +223,12 @@ export function useCreateAppointment() {
       toast.success('Agendamento solicitado! Aguarde a confirmação do profissional.');
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Erro ao criar agendamento');
+      const msg = error?.message || '';
+      if (msg.includes('crédito') || msg.includes('credit') || msg.includes('Sem créditos')) {
+        toast.error('Profissional sem créditos disponíveis. Tente outro profissional ou volte mais tarde.');
+      } else {
+        toast.error(msg || 'Erro ao criar agendamento');
+      }
     },
   });
 }
