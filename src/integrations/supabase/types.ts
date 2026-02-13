@@ -1110,7 +1110,6 @@ export type Database = {
           cpf: string | null
           created_at: string
           credits: number | null
-          crmv: string | null
           full_name: string
           home_service_radius: number | null
           id: string
@@ -1158,7 +1157,6 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           credits?: number | null
-          crmv?: string | null
           full_name: string
           home_service_radius?: number | null
           id?: string
@@ -1206,7 +1204,6 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           credits?: number | null
-          crmv?: string | null
           full_name?: string
           home_service_radius?: number | null
           id?: string
@@ -1807,52 +1804,6 @@ export type Database = {
             | Database["public"]["Enums"]["verification_status"]
             | null
           years_experience: number | null
-        }
-        Insert: {
-          bio?: string | null
-          city?: string | null
-          created_at?: string | null
-          crmv?: string | null
-          full_name?: string | null
-          home_service_radius?: number | null
-          id?: string | null
-          is_verified?: boolean | null
-          latitude?: number | null
-          longitude?: number | null
-          neighborhood?: string | null
-          payment_methods?: string[] | null
-          profile_picture_url?: string | null
-          social_name?: string | null
-          state?: string | null
-          user_id?: string | null
-          user_type?: Database["public"]["Enums"]["user_type"] | null
-          verification_status?:
-            | Database["public"]["Enums"]["verification_status"]
-            | null
-          years_experience?: number | null
-        }
-        Update: {
-          bio?: string | null
-          city?: string | null
-          created_at?: string | null
-          crmv?: string | null
-          full_name?: string | null
-          home_service_radius?: number | null
-          id?: string | null
-          is_verified?: boolean | null
-          latitude?: number | null
-          longitude?: number | null
-          neighborhood?: string | null
-          payment_methods?: string[] | null
-          profile_picture_url?: string | null
-          social_name?: string | null
-          state?: string | null
-          user_id?: string | null
-          user_type?: Database["public"]["Enums"]["user_type"] | null
-          verification_status?:
-            | Database["public"]["Enums"]["verification_status"]
-            | null
-          years_experience?: number | null
         }
         Relationships: []
       }

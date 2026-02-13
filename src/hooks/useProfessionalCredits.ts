@@ -131,31 +131,4 @@ export function useCheckProfessionalCredits(professionalId: string | undefined) 
   });
 }
 
-export function useRecordLostAppointment() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      professionalProfileId,
-      tutorProfileId,
-      serviceId,
-    }: {
-      professionalProfileId: string;
-      tutorProfileId: string;
-      serviceId?: string;
-    }) => {
-      const { data, error } = await supabase
-        .rpc('record_lost_appointment', {
-          p_professional_profile_id: professionalProfileId,
-          p_tutor_profile_id: tutorProfileId,
-          p_service_id: serviceId || null,
-        });
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['professional-credits'] });
-    },
-  });
-}
+// useRecordLostAppointment REMOVED — lost_appointments are now created by backend triggers only

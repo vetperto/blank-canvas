@@ -20,7 +20,7 @@ export interface ProfessionalVerification {
   verified_at: string | null;
   verified_by: string | null;
   verification_notes: string | null;
-  crmv: string | null;
+  crmv?: string | null;
   city: string | null;
   state: string | null;
   created_at: string;
@@ -94,7 +94,6 @@ export function useVerification() {
           verified_at,
           verified_by,
           verification_notes,
-          crmv,
           city,
           state,
           created_at
