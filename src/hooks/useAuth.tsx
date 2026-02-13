@@ -3,11 +3,12 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import type { UserType } from '@/lib/supabase-enums';
 
 interface Profile {
   id: string;
   user_id: string;
-  user_type: 'tutor' | 'profissional' | 'empresa' | 'professional';
+  user_type: UserType;
   full_name: string;
   social_name: string | null;
   phone: string | null;

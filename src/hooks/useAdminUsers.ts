@@ -2,8 +2,9 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
+import type { UserType, VerificationStatus } from "@/lib/supabase-enums";
 
-export type UserType = "tutor" | "profissional" | "empresa" | "professional";
+export type { UserType };
 export type AccountStatus = "active" | "blocked" | "suspended" | "pending";
 
 export interface AdminUser {
@@ -19,7 +20,7 @@ export interface AdminUser {
   account_status: string;
   is_verified: boolean;
   is_featured: boolean;
-  verification_status: "not_verified" | "under_review" | "verified" | "rejected" | null;
+  verification_status: VerificationStatus | null;
   city: string | null;
   state: string | null;
   created_at: string;
