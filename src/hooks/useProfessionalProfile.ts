@@ -71,9 +71,9 @@ export function useProfessionalProfile(profileId: string | undefined) {
 
       try {
         // Fetch profile data from public view (excludes sensitive fields like CPF, email, phone)
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("id, full_name, social_name, bio, profile_picture_url, city, state, neighborhood, is_verified, crmv, user_type, years_experience, average_rating, total_reviews, payment_methods, home_service_radius")
+        const { data: profile, error: profileError } = await (supabase
+          .from("public_search_professionals" as any)
+          .select("*") as any)
           .eq("id", profileId)
           .single();
 

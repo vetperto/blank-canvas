@@ -1804,13 +1804,28 @@ export type Database = {
       }
       public_search_professionals: {
         Row: {
+          average_rating: number | null
+          bio: string | null
+          city: string | null
+          crmv: string | null
           full_name: string | null
+          home_service_radius: number | null
           id: string | null
+          is_featured: boolean | null
+          is_verified: boolean | null
           location: unknown
+          neighborhood: string | null
+          payment_methods: string[] | null
+          profile_picture_url: string | null
+          social_name: string | null
           specialties: string[] | null
+          state: string | null
+          total_reviews: number | null
+          user_type: Database["public"]["Enums"]["user_type"] | null
           verification_status:
             | Database["public"]["Enums"]["verification_status"]
             | null
+          years_experience: number | null
         }
         Relationships: []
       }
