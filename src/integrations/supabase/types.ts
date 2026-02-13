@@ -218,6 +218,13 @@ export type Database = {
             foreignKeyName: "appointments_professional_profile_id_fkey"
             columns: ["professional_profile_id"]
             isOneToOne: false
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_professional_profile_id_fkey"
+            columns: ["professional_profile_id"]
+            isOneToOne: false
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -233,6 +240,13 @@ export type Database = {
             columns: ["tutor_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_tutor_profile_id_fkey"
+            columns: ["tutor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_professionals"
             referencedColumns: ["id"]
           },
           {
@@ -293,6 +307,13 @@ export type Database = {
             foreignKeyName: "availability_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "availability_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -326,6 +347,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocked_dates_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_professionals"
             referencedColumns: ["id"]
           },
           {
@@ -377,6 +405,13 @@ export type Database = {
             foreignKeyName: "companies_id_fkey"
             columns: ["id"]
             isOneToOne: true
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -413,6 +448,13 @@ export type Database = {
             columns: ["professional_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transactions_professional_profile_id_fkey"
+            columns: ["professional_profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_professionals"
             referencedColumns: ["id"]
           },
           {
@@ -473,6 +515,13 @@ export type Database = {
             foreignKeyName: "documents_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -509,6 +558,13 @@ export type Database = {
             foreignKeyName: "favorite_professionals_professional_profile_id_fkey"
             columns: ["professional_profile_id"]
             isOneToOne: false
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorite_professionals_professional_profile_id_fkey"
+            columns: ["professional_profile_id"]
+            isOneToOne: false
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -517,6 +573,13 @@ export type Database = {
             columns: ["tutor_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorite_professionals_tutor_profile_id_fkey"
+            columns: ["tutor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_professionals"
             referencedColumns: ["id"]
           },
           {
@@ -595,6 +658,13 @@ export type Database = {
             foreignKeyName: "lost_appointments_professional_profile_id_fkey"
             columns: ["professional_profile_id"]
             isOneToOne: false
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lost_appointments_professional_profile_id_fkey"
+            columns: ["professional_profile_id"]
+            isOneToOne: false
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -610,6 +680,13 @@ export type Database = {
             columns: ["tutor_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lost_appointments_tutor_profile_id_fkey"
+            columns: ["tutor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_professionals"
             referencedColumns: ["id"]
           },
           {
@@ -661,6 +738,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_preferences_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "public_professionals"
             referencedColumns: ["id"]
           },
           {
@@ -837,6 +921,13 @@ export type Database = {
             foreignKeyName: "pets_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -879,6 +970,13 @@ export type Database = {
             columns: ["professional_profile_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professional_credits_professional_profile_id_fkey"
+            columns: ["professional_profile_id"]
+            isOneToOne: true
+            referencedRelation: "public_professionals"
             referencedColumns: ["id"]
           },
           {
@@ -933,6 +1031,13 @@ export type Database = {
             foreignKeyName: "professional_education_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professional_education_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -969,6 +1074,13 @@ export type Database = {
             columns: ["id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professionals_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "public_professionals"
             referencedColumns: ["id"]
           },
           {
@@ -1180,6 +1292,13 @@ export type Database = {
             foreignKeyName: "reviews_professional_profile_id_fkey"
             columns: ["professional_profile_id"]
             isOneToOne: false
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_professional_profile_id_fkey"
+            columns: ["professional_profile_id"]
+            isOneToOne: false
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -1188,6 +1307,13 @@ export type Database = {
             columns: ["tutor_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_tutor_profile_id_fkey"
+            columns: ["tutor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_professionals"
             referencedColumns: ["id"]
           },
           {
@@ -1242,6 +1368,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_professionals"
             referencedColumns: ["id"]
           },
           {
@@ -1365,6 +1498,13 @@ export type Database = {
             foreignKeyName: "tutors_id_fkey"
             columns: ["id"]
             isOneToOne: true
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutors_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -1416,6 +1556,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_notifications_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_professionals"
             referencedColumns: ["id"]
           },
           {
@@ -1504,6 +1651,13 @@ export type Database = {
             foreignKeyName: "user_subscriptions_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_subscriptions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -1559,6 +1713,13 @@ export type Database = {
             foreignKeyName: "verification_logs_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
+            referencedRelation: "public_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_logs_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "public_search_professionals"
             referencedColumns: ["id"]
           },
@@ -1605,6 +1766,39 @@ export type Database = {
           f_table_schema?: unknown
           srid?: number | null
           type?: string | null
+        }
+        Relationships: []
+      }
+      public_professionals: {
+        Row: {
+          average_rating: number | null
+          city: string | null
+          full_name: string | null
+          id: string | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          state: string | null
+          total_reviews: number | null
+        }
+        Insert: {
+          average_rating?: number | null
+          city?: string | null
+          full_name?: string | null
+          id?: string | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          state?: string | null
+          total_reviews?: number | null
+        }
+        Update: {
+          average_rating?: number | null
+          city?: string | null
+          full_name?: string | null
+          id?: string | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          state?: string | null
+          total_reviews?: number | null
         }
         Relationships: []
       }
@@ -1821,6 +2015,34 @@ export type Database = {
         Args: { _month?: string; _professional_profile_id: string }
         Returns: number
       }
+      create_appointment_secure: {
+        Args: { p_date: string; p_professional_id: string; p_tutor_id: string }
+        Returns: undefined
+      }
+      create_appointment_with_credit:
+        | {
+            Args: {
+              p_date: string
+              p_end_time: string
+              p_pet_id: string
+              p_professional_profile_id: string
+              p_service_id: string
+              p_start_time: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_date: string
+              p_end_time: string
+              p_pet_id: string
+              p_professional_profile_id: string
+              p_service_id: string
+              p_start_time: string
+              p_tutor_profile_id: string
+            }
+            Returns: string
+          }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {

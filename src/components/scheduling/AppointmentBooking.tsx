@@ -32,10 +32,8 @@ import {
   type ServiceLocationType 
 } from '@/hooks/useAppointments';
 import { useCalendarAvailability } from '@/hooks/useCalendarAvailability';
-import { useCheckProfessionalCredits } from '@/hooks/useProfessionalCredits';
 import { AnnualCalendar } from './AnnualCalendar';
 import { PetSelectionCard } from '@/components/pets/PetSelectionCard';
-import { CreditExhaustedMessage } from '@/components/credits/CreditExhaustedMessage';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -82,9 +80,6 @@ export function AppointmentBooking({
     6 // 6 months ahead
   );
   const createAppointment = useCreateAppointment();
-  
-  // Credit system checks (read-only, backend controls credits)
-  const { data: creditCheck, isLoading: checkingCredits } = useCheckProfessionalCredits(professionalId);
 
   // Fetch tutor's pets
   const { data: pets } = useQuery({
@@ -118,18 +113,6 @@ export function AppointmentBooking({
   };
 
   const handleBooking = async () => {
-    // UI-level credit check (backend is the source of truth and will block if no credits)
-    if (!creditCheck?.has_credits) {
-      toast.error('Este profissional está temporariamente indisponível para novos agendamentos.', {
-        description: 'Os créditos do profissional se esgotaram.',
-        action: {
-          label: 'Ver planos',
-          onClick: () => { window.location.href = '/planos'; },
-        },
-      });
-      return;
-    }
-
     // Validate pet selection
     if (!selectedPetId) {
       setPetError(true);
@@ -154,10 +137,10 @@ export function AppointmentBooking({
       });
 
       // Send notification to professional
-      if (result?.id) {
+      if (result) {
         try {
           await supabase.functions.invoke('notify-professional-appointment', {
-            body: { appointmentId: result.id }
+            body: { appointmentId: result }
           });
         } catch (notifError) {
           console.error('Error sending notification:', notifError);
@@ -166,32 +149,12 @@ export function AppointmentBooking({
 
       handleClose();
     } catch (error: any) {
+      // Errors are handled by useCreateAppointment's onError
       console.error('Booking error:', error);
-      const msg = error?.message || '';
-      if (msg.includes('NO_CREDITS_AVAILABLE')) {
-        toast.error('Sem créditos disponíveis', {
-          description: 'Você precisa adquirir um novo plano para continuar recebendo agendamentos.',
-        });
-        window.location.href = '/planos';
-        return;
-      }
-      // Other errors already handled by useCreateAppointment's onError
     }
   };
 
   const renderStep1 = () => {
-    // Check if professional has no credits
-    if (!checkingCredits && creditCheck && !creditCheck.has_credits) {
-      return (
-        <div className="space-y-4">
-          <CreditExhaustedMessage />
-          <Button variant="outline" onClick={handleClose} className="w-full">
-            Voltar e escolher outro profissional
-          </Button>
-        </div>
-      );
-    }
-
     return (
       <div className="space-y-4">
         <div>

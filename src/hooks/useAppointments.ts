@@ -179,7 +179,7 @@ export function useAppointments(options?: {
   });
 }
 
-// Create appointment
+// Create appointment via secure RPC (no direct inserts allowed)
 export function useCreateAppointment() {
   const queryClient = useQueryClient();
   const { profile } = useAuth();
@@ -199,20 +199,23 @@ export function useCreateAppointment() {
     }) => {
       if (!profile?.id) throw new Error('Usuário não autenticado');
       
-      // Validate pet_id is provided
       if (!appointment.pet_id) {
         throw new Error('É obrigatório selecionar um pet para o agendamento');
       }
 
-      const { data, error } = await supabase
-        .from('appointments')
-        .insert({
-          ...appointment,
-          tutor_profile_id: profile.id,
-          status: 'pending',
-        })
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('create_appointment_secure', {
+        p_professional_id: appointment.professional_profile_id,
+        p_tutor_id: profile.id,
+        p_service_id: appointment.service_id || null,
+        p_pet_id: appointment.pet_id,
+        p_date: appointment.appointment_date,
+        p_start_time: appointment.start_time,
+        p_end_time: appointment.end_time,
+        p_location_type: appointment.location_type,
+        p_location_address: appointment.location_address || null,
+        p_tutor_notes: appointment.tutor_notes || null,
+        p_price: appointment.price || null,
+      });
 
       if (error) throw error;
       return data;
@@ -224,9 +227,13 @@ export function useCreateAppointment() {
     },
     onError: (error: any) => {
       const msg = error?.message || '';
-      if (msg.includes('NO_CREDITS_AVAILABLE')) {
-        toast.error('Sem créditos disponíveis', {
-          description: 'Você precisa adquirir um novo plano para continuar recebendo agendamentos.',
+      if (msg.includes('NO_CREDITS_AVAILABLE') || msg.includes('Profissional sem créditos')) {
+        toast.error('Profissional temporariamente indisponível', {
+          description: 'Este profissional não pode receber novos agendamentos no momento.',
+        });
+      } else if (msg.includes('Profissional não está ativo')) {
+        toast.error('Profissional indisponível', {
+          description: 'Este profissional não está ativo no momento.',
         });
       } else {
         toast.error(msg || 'Erro ao criar agendamento');
