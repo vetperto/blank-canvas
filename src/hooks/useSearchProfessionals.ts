@@ -75,6 +75,7 @@ async function enrichWithServices(profileIds: string[], filters: SearchFilters):
 
 /**
  * Map a profile + enrichment data to ProfessionalResult.
+ * distance_meters comes from PostGIS — no frontend calculation.
  */
 function mapToProfessionalResult(
   profile: RpcProfessionalResult,
@@ -106,14 +107,14 @@ function mapToProfessionalResult(
   }
 
   const locationParts = [profile.neighborhood, profile.city, profile.state].filter(Boolean);
-  const distanceKm = profile.distance_meters != null ? profile.distance_meters / 1000 : undefined;
+  const distanceKm = profile.distance_meters != null ? Number(profile.distance_meters) / 1000 : undefined;
 
   return {
     id: profile.id,
     name: profile.social_name || profile.full_name || "Profissional",
     specialty,
     photo: profile.profile_picture_url,
-    rating: Math.round((profile.average_rating || 0) * 10) / 10,
+    rating: Math.round(Number(profile.average_rating || 0) * 10) / 10,
     reviewCount: profile.total_reviews || 0,
     views: Math.floor(Math.random() * 1000) + 100,
     location: locationParts.length > 0 ? locationParts.join(", ") : "Localização não informada",
@@ -127,18 +128,15 @@ function mapToProfessionalResult(
     city: profile.city ?? undefined,
     state: profile.state ?? undefined,
     neighborhood: profile.neighborhood ?? undefined,
-    latitude: profile.latitude ?? undefined,
-    longitude: profile.longitude ?? undefined,
     homeServiceRadius: profile.home_service_radius ?? undefined,
-    locationTypes: locationTypes,
+    locationTypes,
     petTypes: [],
     paymentMethods: profile.payment_methods || [],
   };
 }
 
 /**
- * Convert a PublicSearchProfessional row into the RpcProfessionalResult shape
- * so it can be fed into the shared `mapToProfessionalResult` mapper.
+ * Convert a PublicSearchProfessional view row into RpcProfessionalResult shape.
  */
 function viewRowToRpcShape(row: PublicSearchProfessional): RpcProfessionalResult {
   return {
@@ -156,8 +154,6 @@ function viewRowToRpcShape(row: PublicSearchProfessional): RpcProfessionalResult
     crmv: row.crmv,
     is_verified: row.is_verified,
     payment_methods: row.payment_methods,
-    latitude: null,
-    longitude: null,
     home_service_radius: row.home_service_radius,
   };
 }
@@ -188,14 +184,14 @@ export function useSearchProfessionals() {
       let profilesData: RpcProfessionalResult[];
 
       if (coordinates) {
-        // === GEO SEARCH: Use RPC search_professionals_by_radius ===
-        const radiusMeters = (filters.radius || 10) * 1000;
+        // === GEO SEARCH: PostGIS RPC — all distance logic on server ===
+        const searchRadiusKm = filters.radius || 10;
         const { data, error: rpcError } = await supabase.rpc(
           'search_professionals_by_radius',
           {
             user_lat: coordinates.lat,
             user_lng: coordinates.lng,
-            radius_meters: radiusMeters,
+            search_radius_km: searchRadiusKm,
           }
         );
 
@@ -205,6 +201,7 @@ export function useSearchProfessionals() {
         }
         if (controller.signal.aborted) return;
 
+        // Results already filtered by ST_DWithin and sorted by distance_meters ASC
         profilesData = ((data || []) as RpcProfessionalResult[]).map((p) => ({
           ...p,
           social_name: p.social_name ?? null,
@@ -212,8 +209,6 @@ export function useSearchProfessionals() {
           crmv: p.crmv ?? null,
           is_verified: p.is_verified ?? true,
           payment_methods: p.payment_methods ?? [],
-          latitude: p.latitude ?? null,
-          longitude: p.longitude ?? null,
           home_service_radius: p.home_service_radius ?? null,
         }));
       } else {
@@ -249,7 +244,7 @@ export function useSearchProfessionals() {
         mapToProfessionalResult(profile, enrichment.services, enrichment.subs)
       );
 
-      // === Apply non-geo filters ===
+      // === Apply non-geo filters (service, rating, payment — NOT distance) ===
       if (filters.searchMode === "local_fixo" || filters.searchMode === "domiciliar") {
         results = results.filter(
           (p) => Array.isArray(p.locationTypes) && p.locationTypes.includes(filters.searchMode)
@@ -267,6 +262,7 @@ export function useSearchProfessionals() {
         results = results.filter((p) => availableIds.has(p.id));
       }
 
+      // Sorting: geo results already sorted by PostGIS; text results sorted by rating
       results = applySorting(results, !!coordinates);
 
       if (!controller.signal.aborted) {

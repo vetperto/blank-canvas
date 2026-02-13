@@ -29,7 +29,6 @@ export function useGeolocation() {
     error: null,
   });
 
-  // Get current location from browser
   const getCurrentLocation = useCallback((): Promise<Coordinates | null> => {
     return new Promise((resolve) => {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
@@ -47,12 +46,11 @@ export function useGeolocation() {
 
       navigator.geolocation.getCurrentPosition(
         async (position) => {
-          const coords = {
+          const coords: Coordinates = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           };
 
-          // Reverse geocode to get address
           try {
             const address = await reverseGeocode(coords.lat, coords.lng);
             setState({
@@ -101,7 +99,6 @@ export function useGeolocation() {
     });
   }, []);
 
-  // Reverse geocode coordinates to address using Nominatim
   const reverseGeocode = async (lat: number, lng: number): Promise<AddressInfo> => {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=pt-BR`
@@ -128,21 +125,17 @@ export function useGeolocation() {
     return { formattedAddress: 'Localização encontrada' };
   };
 
-  // Geocode address/CEP to coordinates
   const geocodeAddress = useCallback(async (address: string): Promise<Coordinates | null> => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // Check if it's a CEP (8 digits)
       const cleanCep = address.replace(/\D/g, '');
       
       if (cleanCep.length === 8) {
-        // First get address from ViaCEP
         const viaCepResponse = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
         const viaCepData = await viaCepResponse.json();
 
         if (!viaCepData.erro) {
-          // Then geocode the address
           const searchAddress = `${viaCepData.logradouro}, ${viaCepData.bairro}, ${viaCepData.localidade}, ${viaCepData.uf}, Brasil`;
           const coords = await geocodeString(searchAddress);
           
@@ -164,7 +157,6 @@ export function useGeolocation() {
         }
       }
 
-      // Regular address geocoding
       const coords = await geocodeString(address + ', Brasil');
       
       if (coords) {
@@ -184,7 +176,7 @@ export function useGeolocation() {
         error: 'Endereço não encontrado' 
       }));
       return null;
-    } catch (error) {
+    } catch {
       setState(prev => ({ 
         ...prev, 
         isLoading: false, 
@@ -194,7 +186,6 @@ export function useGeolocation() {
     }
   }, []);
 
-  // Helper to geocode a string address using Nominatim
   const geocodeString = async (address: string): Promise<Coordinates | null> => {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
@@ -211,27 +202,6 @@ export function useGeolocation() {
     return null;
   };
 
-  // Calculate distance between two points (Haversine formula)
-  const calculateDistance = useCallback((
-    lat1: number,
-    lng1: number,
-    lat2: number,
-    lng2: number
-  ): number => {
-    const R = 6371; // Earth radius in km
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLng = (lng2 - lng1) * (Math.PI / 180);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) *
-        Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }, []);
-
-  // Reset state
   const reset = useCallback(() => {
     setState({
       coordinates: null,
@@ -245,7 +215,6 @@ export function useGeolocation() {
     ...state,
     getCurrentLocation,
     geocodeAddress,
-    calculateDistance,
     reset,
   };
 }

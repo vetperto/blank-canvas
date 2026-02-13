@@ -2,21 +2,15 @@ import type { Database } from "@/integrations/supabase/types";
 
 /**
  * Type representing a row from the `public_search_professionals` database view.
- *
- * Derived directly from the auto-generated Supabase types — always in sync.
- *
- * View definition (JOIN profiles + professionals):
- *   - Filters: user_type IN ('profissional','empresa'), account_status = 'active', verification_status = 'verified'
+ * Derived directly from the auto-generated Supabase types.
  */
 export type PublicSearchProfessional =
   Database["public"]["Views"]["public_search_professionals"]["Row"];
 
 /**
  * Shape returned by the `search_professionals_by_radius` RPC.
- *
- * The auto-generated types may be incomplete for overloaded RPCs,
- * so we define the full expected shape here, aligned with the actual
- * DB function return columns.
+ * Aligned with the actual DB function return columns.
+ * No latitude/longitude — distance comes from PostGIS as distance_meters.
  */
 export interface RpcProfessionalResult {
   id: string;
@@ -33,7 +27,5 @@ export interface RpcProfessionalResult {
   crmv: string | null;
   is_verified: boolean | null;
   payment_methods: string[] | null;
-  latitude: number | null;
-  longitude: number | null;
   home_service_radius: number | null;
 }

@@ -38,8 +38,6 @@ export interface ProfessionalResult {
   city?: string;
   state?: string;
   neighborhood?: string;
-  latitude?: number;
-  longitude?: number;
   homeServiceRadius?: number;
   locationTypes?: string[];
   petTypes?: string[];
