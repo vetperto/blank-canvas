@@ -28,14 +28,11 @@ export function useFeaturedProfessionals(limit: number = 4) {
       setError(null);
 
       try {
-        // Fetch professionals from profiles_public view
-        // Criteria: professionals or companies with complete profiles
-        const { data: profiles, error: profilesError } = await supabase
-          .from("profiles")
-          .select("id, full_name, social_name, bio, profile_picture_url, city, state, neighborhood, is_verified, user_type, years_experience, average_rating, total_reviews")
-          .in("user_type", ["profissional", "empresa"])
-          .eq("verification_status", "verified")
-          .eq("account_status", "active")
+        // Fetch professionals from public_search_professionals view
+        // View already filters: verified, active, profissional/empresa
+        const { data: profiles, error: profilesError } = await (supabase
+          .from("public_search_professionals" as any)
+          .select("*") as any)
           .not("full_name", "is", null)
           .not("city", "is", null)
           .limit(20);
@@ -46,14 +43,6 @@ export function useFeaturedProfessionals(limit: number = 4) {
           setProfessionals([]);
           return;
         }
-
-        // Fetch crmv from professionals table for each profile
-        const profileIds = profiles.map((p: any) => p.id);
-        const { data: professionalsData } = await supabase
-          .from("professionals")
-          .select("id, crmv")
-          .in("id", profileIds);
-        const crmvMap = new Map((professionalsData || []).map((p: any) => [p.id, p.crmv]));
 
         // Fetch ratings for each professional
         const professionalsWithRatings = await Promise.all(
@@ -74,9 +63,9 @@ export function useFeaturedProfessionals(limit: number = 4) {
               .eq("is_active", true)
               .limit(5);
 
-            // Determine specialty based on CRMV or services
+            // Determine specialty based on CRMV (from view) or services
             let specialty = "Profissional Pet";
-            if (crmvMap.get(profile.id)) {
+            if (profile.crmv) {
               specialty = "Veterinário";
             } else if (services?.some((s) => 
               s.name?.toLowerCase().includes("banho") || 
