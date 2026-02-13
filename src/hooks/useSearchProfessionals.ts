@@ -198,13 +198,13 @@ export function useSearchProfessionals() {
         }));
       } else {
         // === TEXT SEARCH: Fallback to profiles_public ===
-        let query = supabase
-          .from("profiles_public")
+        let query = (supabase
+          .from("profiles_public" as any)
           .select(`
             id, full_name, social_name, bio, profile_picture_url,
             city, state, neighborhood, is_verified, crmv, user_type,
             latitude, longitude, home_service_radius, payment_methods
-          `)
+          `) as any)
           .in("user_type", ["profissional", "empresa"]);
 
         if (filters.location && filters.location !== "Minha localização atual") {

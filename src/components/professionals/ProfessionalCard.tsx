@@ -141,22 +141,21 @@ export function ProfessionalCard({
 
               {/* Rating */}
               <div className="flex items-center gap-3 mt-2">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${
-                        i < Math.floor(rating)
-                          ? "fill-star-filled text-star-filled"
-                          : "text-star-empty"
-                      }`}
-                    />
-                  ))}
-                  <span className="ml-1 text-sm font-medium">{rating.toFixed(1)}</span>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  ({reviewCount} avaliações)
-                </span>
+                {reviewCount > 0 ? (
+                  <>
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-star-filled text-star-filled" />
+                      <span className="text-sm font-medium">{rating.toFixed(1)}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      ({reviewCount} {reviewCount === 1 ? "avaliação" : "avaliações"})
+                    </span>
+                  </>
+                ) : (
+                  <Badge variant="secondary" className="text-xs">
+                    Novo no VetPerto
+                  </Badge>
+                )}
               </div>
 
               {/* Location & Views */}
