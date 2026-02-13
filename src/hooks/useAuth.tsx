@@ -163,50 +163,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, profileData: Partial<Profile>): Promise<{ userId: string; profileId: string } | undefined> => {
     try {
-      // 1. Create auth user
+      // 1. Create auth user with password (no OTP/magic link)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: window.location.origin,
-        },
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error('Falha ao criar usuário');
+      if (!authData.user) throw new Error('Usuário não retornado após signUp');
 
-      // 2. Create profile
-      const { data: profileData2, error: profileError } = await supabase
+      // 2. Validate session exists
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        console.warn('Sessão não disponível imediatamente após signUp (email confirmation pode estar ativo)');
+      }
+
+      // 3. Create profile - DO NOT send 'id', DO NOT use .select().single()
+      const { error: profileError } = await supabase
         .from('profiles')
         .insert({
           user_id: authData.user.id,
           full_name: profileData.full_name || '',
           user_type: profileData.user_type || 'tutor',
-          social_name: profileData.social_name,
-          phone: profileData.phone,
-          cpf: profileData.cpf,
-          cnpj: profileData.cnpj,
-          crmv: profileData.crmv,
-          cep: profileData.cep,
-          street: profileData.street,
-          number: profileData.number,
-          complement: profileData.complement,
-          neighborhood: profileData.neighborhood,
-          city: profileData.city,
-          state: profileData.state,
-          bio: profileData.bio,
-          years_experience: profileData.years_experience,
+          social_name: profileData.social_name ?? null,
+          phone: profileData.phone ?? null,
+          cpf: profileData.cpf ?? null,
+          cnpj: profileData.cnpj ?? null,
+          crmv: profileData.crmv ?? null,
+          cep: profileData.cep ?? null,
+          street: profileData.street ?? null,
+          number: profileData.number ?? null,
+          complement: profileData.complement ?? null,
+          neighborhood: profileData.neighborhood ?? null,
+          city: profileData.city ?? null,
+          state: profileData.state ?? null,
+          bio: profileData.bio ?? null,
+          years_experience: profileData.years_experience ?? null,
           lgpd_accepted: profileData.lgpd_accepted || false,
           terms_accepted: profileData.terms_accepted || false,
           lgpd_accepted_at: profileData.lgpd_accepted ? new Date().toISOString() : null,
           terms_accepted_at: profileData.terms_accepted ? new Date().toISOString() : null,
-        })
-        .select('id')
-        .single();
+        });
 
       if (profileError) throw profileError;
 
-      // 3. Record legal agreements
+      // 4. Record legal agreements
       await supabase.from('legal_agreements').insert([
         {
           user_id: authData.user.id,
@@ -221,7 +222,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ]);
 
       toast.success('Conta criada com sucesso!');
-      return { userId: authData.user.id, profileId: profileData2.id };
+      return { userId: authData.user.id, profileId: authData.user.id };
     } catch (error: any) {
       console.error('SignUp error:', error);
       toast.error(error.message || 'Erro ao criar conta');
