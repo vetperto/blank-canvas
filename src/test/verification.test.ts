@@ -15,9 +15,9 @@ describe('Verification System', () => {
     vi.clearAllMocks();
   });
 
-  describe('profiles_public view', () => {
+  describe('public_search_professionals view', () => {
     it('should only return verified professionals in search results', async () => {
-      // Mock the profiles_public view query
+      // Mock the public_search_professionals view query
       const mockProfiles = [
         { id: '1', full_name: 'Dr. Verified', verification_status: 'verified', user_type: 'profissional' },
         { id: '2', full_name: 'Tutor User', verification_status: null, user_type: 'tutor' },
@@ -104,7 +104,7 @@ describe('Verification System', () => {
       });
 
       expect(result.data).toBe(true);
-      // After reset, profile should no longer appear in profiles_public for professionals
+      // After reset, profile should no longer appear in public_search_professionals
     });
   });
 

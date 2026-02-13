@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { PublicSearchProfessional } from "@/lib/search/public-professional";
 
-// Payment method ID to display label mapping
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
   credit_card: "Cartão de Crédito",
   debit_card: "Cartão de Débito",
@@ -9,9 +9,9 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
   cash: "Dinheiro"
 };
 
-function formatPaymentMethods(methods: string[]): string[] {
+function formatPaymentMethods(methods: string[] | null): string[] {
   if (!methods || methods.length === 0) {
-    return ["Consulte"]; // Default when no methods configured
+    return ["Consulte"];
   }
   return methods.map(m => PAYMENT_METHOD_LABELS[m] || m);
 }
@@ -70,14 +70,17 @@ export function useProfessionalProfile(profileId: string | undefined) {
       setError(null);
 
       try {
-        // Fetch profile data from public view (excludes sensitive fields like CPF, email, phone)
-        const { data: profile, error: profileError } = await (supabase
+        // Query public_search_professionals — single cast, result is strongly typed
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: rawProfile, error: profileError } = await (supabase
           .from("public_search_professionals" as any)
           .select("*") as any)
           .eq("id", profileId)
           .single();
 
         if (profileError) throw profileError;
+
+        const profile = rawProfile as PublicSearchProfessional | null;
         if (!profile) throw new Error("Profissional não encontrado");
 
         // Fetch services
@@ -132,11 +135,9 @@ export function useProfessionalProfile(profileId: string | undefined) {
           ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
           : 0;
 
-        // Build location string (public view doesn't expose exact street address for privacy)
+        // Build location string
         const locationParts = [profile.neighborhood, profile.city, profile.state].filter(Boolean);
         const location = locationParts.length > 0 ? locationParts.join(", ") : "Localização não informada";
-        
-        // Address not exposed in public view - use neighborhood/city instead
         const address = location;
 
         // Determine specialty
@@ -150,7 +151,7 @@ export function useProfessionalProfile(profileId: string | undefined) {
         }
 
         // Determine plan type
-        let planType: "basic" | "intermediate" | "complete" | "enterprise" = "basic";
+        let planType: ProfessionalProfileData["planType"] = "basic";
         if (subscription?.subscriptions?.slug) {
           const slug = subscription.subscriptions.slug;
           if (slug.includes("empresas") || slug.includes("enterprise")) {
@@ -164,19 +165,13 @@ export function useProfessionalProfile(profileId: string | undefined) {
 
         // Build availability by day
         const availabilityByDay: Record<string, string[]> = {
-          monday: [],
-          tuesday: [],
-          wednesday: [],
-          thursday: [],
-          friday: [],
-          saturday: [],
-          sunday: [],
+          monday: [], tuesday: [], wednesday: [], thursday: [],
+          friday: [], saturday: [], sunday: [],
         };
 
         availability?.forEach((slot) => {
           const dayKey = slot.day_of_week;
           if (availabilityByDay[dayKey]) {
-            // Generate time slots between start and end time
             const startHour = parseInt(slot.start_time.split(":")[0]);
             const endHour = parseInt(slot.end_time.split(":")[0]);
             for (let hour = startHour; hour < endHour; hour++) {
@@ -193,14 +188,17 @@ export function useProfessionalProfile(profileId: string | undefined) {
         }));
 
         // Format reviews
-        const formattedReviews = (reviews || []).map((r: any) => ({
-          id: r.id,
-          author: r.profiles?.social_name || r.profiles?.full_name || "Anônimo",
-          rating: r.rating,
-          date: new Date(r.created_at).toLocaleDateString("pt-BR"),
-          comment: r.comment || "",
-          pet: "",
-        }));
+        const formattedReviews = (reviews || []).map((r) => {
+          const reviewProfiles = r.profiles as { full_name: string; social_name: string | null } | null;
+          return {
+            id: r.id,
+            author: reviewProfiles?.social_name || reviewProfiles?.full_name || "Anônimo",
+            rating: r.rating,
+            date: new Date(r.created_at).toLocaleDateString("pt-BR"),
+            comment: r.comment || "",
+            pet: "",
+          };
+        });
 
         // Calculate experience
         const yearsExp = profile.years_experience || 0;
@@ -213,7 +211,7 @@ export function useProfessionalProfile(profileId: string | undefined) {
           photo: profile.profile_picture_url,
           rating: Math.round(avgRating * 10) / 10,
           reviewCount: reviews?.length || 0,
-          views: Math.floor(Math.random() * 1000) + 100, // Mock views for now
+          views: Math.floor(Math.random() * 1000) + 100,
           location,
           address,
           crmv: profile.crmv,
@@ -221,8 +219,8 @@ export function useProfessionalProfile(profileId: string | undefined) {
           planType,
           description: profile.bio || "Este profissional ainda não adicionou uma descrição.",
           services: formattedServices,
-          paymentMethods: formatPaymentMethods((profile as any).payment_methods || []),
-          attendanceTypes: ["Consultório"], // Default
+          paymentMethods: formatPaymentMethods(profile.payment_methods),
+          attendanceTypes: ["Consultório"],
           experience,
           education: (education || []).map((e) => ({
             title: e.title,

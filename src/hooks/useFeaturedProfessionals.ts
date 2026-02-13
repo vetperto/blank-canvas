@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { PublicSearchProfessional } from "@/lib/search/public-professional";
 
 export interface FeaturedProfessional {
   id: string;
@@ -28,9 +29,9 @@ export function useFeaturedProfessionals(limit: number = 4) {
       setError(null);
 
       try {
-        // Fetch professionals from public_search_professionals view
-        // View already filters: verified, active, profissional/empresa
-        const { data: profiles, error: profilesError } = await (supabase
+        // Query public_search_professionals view (already filters verified + active)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: rawProfiles, error: profilesError } = await (supabase
           .from("public_search_professionals" as any)
           .select("*") as any)
           .not("full_name", "is", null)
@@ -39,41 +40,39 @@ export function useFeaturedProfessionals(limit: number = 4) {
 
         if (profilesError) throw profilesError;
 
-        if (!profiles || profiles.length === 0) {
+        const profiles = (rawProfiles ?? []) as PublicSearchProfessional[];
+
+        if (profiles.length === 0) {
           setProfessionals([]);
           return;
         }
 
-        // Fetch ratings for each professional
         const professionalsWithRatings = await Promise.all(
-          profiles.map(async (profile: any) => {
-            // Get rating using database function
+          profiles.map(async (profile) => {
             const { data: ratingData } = await supabase
               .rpc("get_professional_rating", {
                 _professional_profile_id: profile.id,
               });
 
-            const rating = ratingData?.[0] as RatingResult | undefined;
+            const rating = (ratingData as RatingResult[] | null)?.[0];
 
-            // Fetch services to determine specialty
             const { data: services } = await supabase
               .from("services")
               .select("name")
-              .eq("profile_id", profile.id!)
+              .eq("profile_id", profile.id)
               .eq("is_active", true)
               .limit(5);
 
-            // Determine specialty based on CRMV (from view) or services
             let specialty = "Profissional Pet";
             if (profile.crmv) {
               specialty = "Veterinário";
-            } else if (services?.some((s) => 
-              s.name?.toLowerCase().includes("banho") || 
+            } else if (services?.some((s) =>
+              s.name?.toLowerCase().includes("banho") ||
               s.name?.toLowerCase().includes("tosa")
             )) {
               specialty = "Pet Groomer • Banho e Tosa";
-            } else if (services?.some((s) => 
-              s.name?.toLowerCase().includes("passeio") || 
+            } else if (services?.some((s) =>
+              s.name?.toLowerCase().includes("passeio") ||
               s.name?.toLowerCase().includes("walker")
             )) {
               specialty = "Pet Walker";
@@ -81,14 +80,13 @@ export function useFeaturedProfessionals(limit: number = 4) {
               specialty = services[0].name;
             }
 
-            // Build location string
             const locationParts = [profile.city, profile.state].filter(Boolean);
-            const location = locationParts.length > 0 
-              ? locationParts.join(", ") 
+            const location = locationParts.length > 0
+              ? locationParts.join(", ")
               : "Brasil";
 
             return {
-              id: profile.id!,
+              id: profile.id,
               name: profile.social_name || profile.full_name || "Profissional",
               specialty,
               photo: profile.profile_picture_url,
@@ -100,20 +98,13 @@ export function useFeaturedProfessionals(limit: number = 4) {
           })
         );
 
-        // Sort by: verified first, then by rating, then by review count
         const sorted = professionalsWithRatings.sort((a, b) => {
-          // Verified professionals first
           if (a.isVerified && !b.isVerified) return -1;
           if (!a.isVerified && b.isVerified) return 1;
-          
-          // Then by rating (higher first)
           if (b.rating !== a.rating) return b.rating - a.rating;
-          
-          // Then by review count (more reviews first)
           return b.reviewCount - a.reviewCount;
         });
 
-        // Take only the top N professionals
         setProfessionals(sorted.slice(0, limit));
       } catch (err) {
         console.error("Error fetching featured professionals:", err);
