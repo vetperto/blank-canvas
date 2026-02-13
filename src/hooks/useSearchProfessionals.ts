@@ -1,21 +1,30 @@
 import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { SearchFilters, ProfessionalResult } from "@/lib/search/types";
+import type { PublicSearchProfessional } from "@/lib/search/public-professional";
 import { applyServiceFilter, applyLocationTypeFilter, applyRatingFilter, applyPaymentFilter, applySorting } from "@/lib/search/filter-pipeline";
 
 export type { SearchFilters, ProfessionalResult };
 
-// RPC result type matching search_professionals_by_radius return
+/** Shape returned by the `search_professionals_by_radius` RPC. */
 interface RpcProfessionalResult {
   id: string;
   full_name: string;
+  social_name: string | null;
   bio: string | null;
   city: string | null;
   state: string | null;
+  neighborhood: string | null;
   profile_picture_url: string | null;
   average_rating: number | null;
   total_reviews: number | null;
   distance_meters: number | null;
+  crmv: string | null;
+  is_verified: boolean | null;
+  payment_methods: string[] | null;
+  latitude: number | null;
+  longitude: number | null;
+  home_service_radius: number | null;
 }
 
 /**
@@ -45,10 +54,17 @@ async function geocodeLocation(
   return null;
 }
 
+/** Service / subscription / availability enrichment data. */
+interface EnrichmentData {
+  services: Array<{ profile_id: string; name: string; price: number | null; location_type: string; description: string | null }>;
+  subs: Array<{ profile_id: string; subscription_id: string; subscriptions: { slug: string } | null }>;
+  avail: Array<{ profile_id: string; day_of_week: string }>;
+}
+
 /**
- * Enrich RPC results with services, subscriptions, and availability data.
+ * Enrich profile IDs with services, subscriptions, and availability data.
  */
-async function enrichWithServices(profileIds: string[], filters: SearchFilters) {
+async function enrichWithServices(profileIds: string[], filters: SearchFilters): Promise<EnrichmentData> {
   if (profileIds.length === 0) return { services: [], subs: [], avail: [] };
 
   const [servicesResult, subsResult, availResult] = await Promise.all([
@@ -68,13 +84,13 @@ async function enrichWithServices(profileIds: string[], filters: SearchFilters) 
           return supabase.from("availability").select("profile_id, day_of_week")
             .in("profile_id", profileIds).in("day_of_week", daysToCheck);
         })()
-      : Promise.resolve({ data: [] }),
+      : Promise.resolve({ data: [] as Array<{ profile_id: string; day_of_week: string }> }),
   ]);
 
   return {
-    services: servicesResult.data || [],
-    subs: subsResult.data || [],
-    avail: availResult.data || [],
+    services: (servicesResult.data || []) as EnrichmentData["services"],
+    subs: (subsResult.data || []) as EnrichmentData["subs"],
+    avail: (availResult.data || []) as EnrichmentData["avail"],
   };
 }
 
@@ -82,24 +98,24 @@ async function enrichWithServices(profileIds: string[], filters: SearchFilters) 
  * Map a profile + enrichment data to ProfessionalResult.
  */
 function mapToProfessionalResult(
-  profile: RpcProfessionalResult & { social_name?: string; neighborhood?: string; crmv?: string; is_verified?: boolean; payment_methods?: string[]; latitude?: number; longitude?: number; home_service_radius?: number },
-  servicesData: any[],
-  subsData: any[],
+  profile: RpcProfessionalResult,
+  servicesData: EnrichmentData["services"],
+  subsData: EnrichmentData["subs"],
 ): ProfessionalResult {
-  const profileServices = servicesData.filter((s: any) => s.profile_id === profile.id);
-  const profileSub = subsData.find((s: any) => s.profile_id === profile.id) as any;
+  const profileServices = servicesData.filter((s) => s.profile_id === profile.id);
+  const profileSub = subsData.find((s) => s.profile_id === profile.id);
 
   const minPrice = profileServices.length > 0
-    ? Math.min(...profileServices.filter((s: any) => s.price).map((s: any) => s.price))
+    ? Math.min(...profileServices.filter((s) => s.price != null).map((s) => s.price!))
     : null;
 
-  const locationTypes = [...new Set(profileServices.map((s: any) => s.location_type).filter(Boolean))];
+  const locationTypes = [...new Set(profileServices.map((s) => s.location_type).filter(Boolean))];
 
   let specialty = "Profissional Pet";
   if (profile.crmv) specialty = "Veterinário";
-  else if (profileServices.some((s: any) => s.name?.toLowerCase().includes("banho") || s.name?.toLowerCase().includes("tosa")))
+  else if (profileServices.some((s) => s.name?.toLowerCase().includes("banho") || s.name?.toLowerCase().includes("tosa")))
     specialty = "Pet Groomer • Banho e Tosa";
-  else if (profileServices.some((s: any) => s.name?.toLowerCase().includes("passeio") || s.name?.toLowerCase().includes("walker")))
+  else if (profileServices.some((s) => s.name?.toLowerCase().includes("passeio") || s.name?.toLowerCase().includes("walker")))
     specialty = "Pet Walker";
 
   let planType: ProfessionalResult["planType"] = "basic";
@@ -124,7 +140,7 @@ function mapToProfessionalResult(
     location: locationParts.length > 0 ? locationParts.join(", ") : "Localização não informada",
     distance: distanceKm ? `${distanceKm.toFixed(1)} km` : "",
     distanceKm,
-    services: profileServices.map((s: any) => s.name).slice(0, 4),
+    services: profileServices.map((s) => s.name).slice(0, 4),
     isVerified: profile.is_verified || false,
     planType,
     nextAvailable: "Consultar agenda",
@@ -135,9 +151,35 @@ function mapToProfessionalResult(
     latitude: profile.latitude ?? undefined,
     longitude: profile.longitude ?? undefined,
     homeServiceRadius: profile.home_service_radius ?? undefined,
-    locationTypes: locationTypes as string[],
+    locationTypes: locationTypes,
     petTypes: [],
     paymentMethods: profile.payment_methods || [],
+  };
+}
+
+/**
+ * Convert a PublicSearchProfessional row into the RpcProfessionalResult shape
+ * so it can be fed into the shared `mapToProfessionalResult` mapper.
+ */
+function viewRowToRpcShape(row: PublicSearchProfessional): RpcProfessionalResult {
+  return {
+    id: row.id,
+    full_name: row.full_name,
+    social_name: row.social_name,
+    bio: row.bio,
+    city: row.city,
+    state: row.state,
+    neighborhood: row.neighborhood,
+    profile_picture_url: row.profile_picture_url,
+    average_rating: row.average_rating,
+    total_reviews: row.total_reviews,
+    distance_meters: null,
+    crmv: row.crmv,
+    is_verified: row.is_verified,
+    payment_methods: row.payment_methods,
+    latitude: null,
+    longitude: null,
+    home_service_radius: row.home_service_radius,
   };
 }
 
@@ -164,11 +206,12 @@ export function useSearchProfessionals() {
       }
       if (controller.signal.aborted) return;
 
-      let profilesData: any[];
+      let profilesData: RpcProfessionalResult[];
 
       if (coordinates) {
         // === GEO SEARCH: Use RPC search_professionals_by_radius ===
-        const radiusMeters = (filters.radius || 10) * 1000; // Convert km to meters
+        const radiusMeters = (filters.radius || 10) * 1000;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error: rpcError } = await supabase.rpc(
           'search_professionals_by_radius' as any,
           {
@@ -184,13 +227,12 @@ export function useSearchProfessionals() {
         }
         if (controller.signal.aborted) return;
 
-        // RPC already filters by is_verified, account_status, user_type
-        profilesData = (data || []).map((p: any) => ({
+        profilesData = ((data || []) as RpcProfessionalResult[]).map((p) => ({
           ...p,
           social_name: p.social_name ?? null,
           neighborhood: p.neighborhood ?? null,
           crmv: p.crmv ?? null,
-          is_verified: p.is_verified ?? true, // RPC only returns verified
+          is_verified: p.is_verified ?? true,
           payment_methods: p.payment_methods ?? [],
           latitude: p.latitude ?? null,
           longitude: p.longitude ?? null,
@@ -198,6 +240,7 @@ export function useSearchProfessionals() {
         }));
       } else {
         // === TEXT SEARCH: Fallback to public_search_professionals view ===
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let query = (supabase
           .from("public_search_professionals" as any)
           .select("*") as any);
@@ -215,25 +258,21 @@ export function useSearchProfessionals() {
         if (queryError) throw queryError;
         if (controller.signal.aborted) return;
 
-        profilesData = (data || []).map((p: any) => ({
-          ...p,
-          average_rating: 0,
-          total_reviews: 0,
-          distance_meters: null,
-        }));
+        const viewRows = (data ?? []) as PublicSearchProfessional[];
+        profilesData = viewRows.map(viewRowToRpcShape);
       }
 
       // === Enrich with services, subscriptions, availability ===
-      const profileIds = profilesData.map((p: any) => p.id).filter(Boolean);
-      const { services, subs, avail } = await enrichWithServices(profileIds, filters);
+      const profileIds = profilesData.map((p) => p.id).filter(Boolean);
+      const enrichment = await enrichWithServices(profileIds, filters);
       if (controller.signal.aborted) return;
 
       // === Map to ProfessionalResult ===
-      let results: ProfessionalResult[] = profilesData.map((profile: any) =>
-        mapToProfessionalResult(profile, services, subs)
+      let results: ProfessionalResult[] = profilesData.map((profile) =>
+        mapToProfessionalResult(profile, enrichment.services, enrichment.subs)
       );
 
-      // === Apply non-geo filters (service, locationType, rating, payment, searchMode) ===
+      // === Apply non-geo filters ===
       if (filters.searchMode === "local_fixo" || filters.searchMode === "domiciliar") {
         results = results.filter(
           (p) => Array.isArray(p.locationTypes) && p.locationTypes.includes(filters.searchMode)
@@ -246,9 +285,8 @@ export function useSearchProfessionals() {
       results = applyRatingFilter(results, filters.minRating);
       results = applyPaymentFilter(results, filters.paymentMethods);
 
-      // Availability filter
       if (filters.availableToday || filters.availableThisWeek) {
-        const availableIds = new Set(avail.map((a: any) => a.profile_id));
+        const availableIds = new Set(enrichment.avail.map((a) => a.profile_id));
         results = results.filter((p) => availableIds.has(p.id));
       }
 
