@@ -197,15 +197,17 @@ export function useSearchProfessionals() {
           home_service_radius: p.home_service_radius ?? null,
         }));
       } else {
-        // === TEXT SEARCH: Fallback to profiles_public ===
-        let query = (supabase
-          .from("profiles_public" as any)
+        // === TEXT SEARCH: Fallback to profiles with RLS ===
+        let query = supabase
+          .from("profiles")
           .select(`
             id, full_name, social_name, bio, profile_picture_url,
             city, state, neighborhood, is_verified, crmv, user_type,
             latitude, longitude, home_service_radius, payment_methods
-          `) as any)
-          .in("user_type", ["profissional", "empresa"]);
+          `)
+          .in("user_type", ["profissional", "empresa"])
+          .eq("verification_status", "verified")
+          .eq("account_status", "active");
 
         if (filters.location && filters.location !== "Minha localização atual") {
           const searchTerm = filters.location.toLowerCase().trim().split(",")[0]?.trim();
