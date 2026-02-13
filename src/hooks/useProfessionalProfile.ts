@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { PublicSearchProfessional } from "@/lib/search/public-professional";
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
   credit_card: "Cartão de Crédito",
@@ -70,17 +69,14 @@ export function useProfessionalProfile(profileId: string | undefined) {
       setError(null);
 
       try {
-        // Query public_search_professionals — single cast, result is strongly typed
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: rawProfile, error: profileError } = await (supabase
-          .from("public_search_professionals" as any)
-          .select("*") as any)
+        // Query public_search_professionals — fully typed via generated Supabase types
+        const { data: profile, error: profileError } = await supabase
+          .from("public_search_professionals")
+          .select("*")
           .eq("id", profileId)
           .single();
 
         if (profileError) throw profileError;
-
-        const profile = rawProfile as PublicSearchProfessional | null;
         if (!profile) throw new Error("Profissional não encontrado");
 
         // Fetch services
