@@ -2416,15 +2416,25 @@ export type Database = {
           }
       search_professionals_by_radius:
         | {
-            Args: { radius_meters: number; user_lat: number; user_lng: number }
+            Args: {
+              search_radius_km?: number
+              user_lat: number
+              user_lng: number
+            }
             Returns: {
               average_rating: number
               bio: string
               city: string
+              crmv: string
               distance_meters: number
               full_name: string
+              home_service_radius: number
               id: string
+              is_verified: boolean
+              neighborhood: string
+              payment_methods: string[]
               profile_picture_url: string
+              social_name: string
               state: string
               total_reviews: number
             }[]
