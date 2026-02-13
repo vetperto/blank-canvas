@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
 
-export type UserType = "tutor" | "profissional" | "empresa";
+export type UserType = "tutor" | "profissional" | "empresa" | "professional";
 export type AccountStatus = "active" | "blocked" | "suspended" | "pending";
 
 export interface AdminUser {
