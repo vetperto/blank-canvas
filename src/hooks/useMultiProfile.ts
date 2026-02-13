@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 interface ProfileType {
   profile_id: string;
-  profile_type: 'tutor' | 'profissional' | 'empresa';
+  profile_type: 'tutor' | 'profissional' | 'empresa' | 'professional';
   full_name: string;
   is_verified: boolean;
 }
@@ -18,7 +18,7 @@ interface CpfCheckResult {
 interface ProfileByType {
   id: string;
   user_id: string;
-  user_type: 'tutor' | 'profissional' | 'empresa';
+  user_type: 'tutor' | 'profissional' | 'empresa' | 'professional';
   full_name: string;
   social_name: string | null;
   email: string;
@@ -216,12 +216,15 @@ export function useMultiProfile() {
         };
       }
       
+      // Separate professional-specific fields from profile fields
+      const { crmv, ...profileFields } = profileData;
+      
       // Criar novo perfil
       const { data, error: insertError } = await supabase
         .from('profiles')
         .insert({
           user_id: userId,
-          ...profileData,
+          ...profileFields,
           lgpd_accepted_at: profileData.lgpd_accepted ? new Date().toISOString() : null,
           terms_accepted_at: profileData.terms_accepted ? new Date().toISOString() : null,
         })
@@ -229,6 +232,14 @@ export function useMultiProfile() {
         .single();
       
       if (insertError) throw insertError;
+      
+      // If professional, insert into professionals table
+      if (profileData.user_type === 'profissional' && crmv && data) {
+        await supabase.from('professionals').insert({
+          id: data.id,
+          crmv: crmv ?? null,
+        });
+      }
       
       toast.success(`Perfil de ${profileData.user_type} criado com sucesso!`);
       

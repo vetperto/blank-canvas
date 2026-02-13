@@ -3065,7 +3065,7 @@ export type Database = {
         | "silvestre_exotico"
       service_location_type: "clinic" | "home_visit" | "both"
       subscription_status: "active" | "cancelled" | "expired" | "pending"
-      user_type: "tutor" | "profissional" | "empresa"
+      user_type: "tutor" | "profissional" | "empresa" | "professional"
       verification_status:
         | "not_verified"
         | "under_review"
@@ -3234,7 +3234,7 @@ export const Constants = {
       ],
       service_location_type: ["clinic", "home_visit", "both"],
       subscription_status: ["active", "cancelled", "expired", "pending"],
-      user_type: ["tutor", "profissional", "empresa"],
+      user_type: ["tutor", "profissional", "empresa", "professional"],
       verification_status: [
         "not_verified",
         "under_review",

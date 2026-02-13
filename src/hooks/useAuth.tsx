@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 interface Profile {
   id: string;
   user_id: string;
-  user_type: 'tutor' | 'profissional' | 'empresa';
+  user_type: 'tutor' | 'profissional' | 'empresa' | 'professional';
   full_name: string;
   social_name: string | null;
   phone: string | null;
@@ -37,7 +37,7 @@ interface AuthContextType {
   profile: Profile | null;
   profiles: Profile[];  // All profiles for this user
   loading: boolean;
-  signUp: (email: string, password: string, profileData: Partial<Profile>) => Promise<{ userId: string; profileId: string } | undefined>;
+  signUp: (email: string, password: string, profileData: Partial<Profile>, professionalData?: { crmv?: string; specialties?: string[] }) => Promise<{ userId: string; profileId: string } | undefined>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -161,7 +161,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, profileData: Partial<Profile>): Promise<{ userId: string; profileId: string } | undefined> => {
+  const signUp = async (
+    email: string,
+    password: string,
+    profileData: Partial<Profile>,
+    professionalData?: { crmv?: string; specialties?: string[] }
+  ): Promise<{ userId: string; profileId: string } | undefined> => {
     try {
       // 1. Create auth user with password (no OTP/magic link)
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -189,7 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           phone: profileData.phone ?? null,
           cpf: profileData.cpf ?? null,
           cnpj: profileData.cnpj ?? null,
-          crmv: profileData.crmv ?? null,
+          // crmv belongs to `professionals` table, not here
           cep: profileData.cep ?? null,
           street: profileData.street ?? null,
           number: profileData.number ?? null,
@@ -207,7 +212,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (profileError) throw profileError;
 
-      // 4. Record legal agreements
+      // 4. If professional, insert into professionals table
+      if (profileData.user_type === 'profissional' && professionalData) {
+        // First get the profile id
+        const { data: newProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', authData.user.id)
+          .single();
+
+        if (newProfile) {
+          const { error: profError } = await supabase
+            .from('professionals')
+            .insert({
+              id: newProfile.id,
+              crmv: professionalData.crmv ?? null,
+              specialties: professionalData.specialties ?? null,
+            });
+          if (profError) console.error('Error inserting professional data:', profError);
+        }
+      }
+
+      // 5. Record legal agreements
       await supabase.from('legal_agreements').insert([
         {
           user_id: authData.user.id,

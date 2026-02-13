@@ -273,6 +273,7 @@ export default function Register() {
         }
       }
 
+      // Separate profile fields from professional-specific fields
       const profileData = {
         user_type: userType as 'tutor' | 'profissional' | 'empresa',
         full_name: data.full_name,
@@ -289,13 +290,17 @@ export default function Register() {
         terms_accepted: data.terms_accepted,
         cpf: 'cpf' in data ? data.cpf : undefined,
         cnpj: 'cnpj' in data ? data.cnpj : undefined,
-        crmv: 'crmv' in data ? data.crmv : undefined,
         bio: 'bio' in data ? data.bio : undefined,
         years_experience: 'years_experience' in data ? data.years_experience : undefined,
       };
 
+      // Professional-specific data (crmv, specialties go to `professionals` table)
+      const professionalData = userType === 'profissional' ? {
+        crmv: 'crmv' in data ? (data as any).crmv : undefined,
+      } : undefined;
+
       // Create account
-      const result = await signUp(data.email, data.password, profileData);
+      const result = await signUp(data.email, data.password, profileData, professionalData);
       
       if (!result) {
         throw new Error('Falha ao criar conta');
