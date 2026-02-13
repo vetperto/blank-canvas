@@ -129,6 +129,8 @@ function mapToProfessionalResult(
     state: profile.state ?? undefined,
     neighborhood: profile.neighborhood ?? undefined,
     homeServiceRadius: profile.home_service_radius ?? undefined,
+    latitude: profile.latitude != null ? Number(profile.latitude) : undefined,
+    longitude: profile.longitude != null ? Number(profile.longitude) : undefined,
     locationTypes,
     petTypes: [],
     paymentMethods: profile.payment_methods || [],
@@ -155,6 +157,8 @@ function viewRowToRpcShape(row: PublicSearchProfessional): RpcProfessionalResult
     is_verified: row.is_verified,
     payment_methods: row.payment_methods,
     home_service_radius: row.home_service_radius,
+    latitude: null,
+    longitude: null,
   };
 }
 
@@ -210,6 +214,8 @@ export function useSearchProfessionals() {
           is_verified: p.is_verified ?? true,
           payment_methods: p.payment_methods ?? [],
           home_service_radius: p.home_service_radius ?? null,
+          latitude: p.latitude ?? null,
+          longitude: p.longitude ?? null,
         }));
       } else {
         // === TEXT SEARCH: Fallback to public_search_professionals view ===

@@ -28,4 +28,8 @@ export interface RpcProfessionalResult {
   is_verified: boolean | null;
   payment_methods: string[] | null;
   home_service_radius: number | null;
+  /** Extracted from PostGIS geography via ST_Y — for map display only */
+  latitude: number | null;
+  /** Extracted from PostGIS geography via ST_X — for map display only */
+  longitude: number | null;
 }
