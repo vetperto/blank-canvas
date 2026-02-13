@@ -224,8 +224,10 @@ export function useCreateAppointment() {
     },
     onError: (error: any) => {
       const msg = error?.message || '';
-      if (msg.includes('crédito') || msg.includes('credit') || msg.includes('Sem créditos')) {
-        toast.error('Profissional sem créditos disponíveis. Tente outro profissional ou volte mais tarde.');
+      if (msg.includes('NO_CREDITS_AVAILABLE')) {
+        toast.error('Sem créditos disponíveis', {
+          description: 'Você precisa adquirir um novo plano para continuar recebendo agendamentos.',
+        });
       } else {
         toast.error(msg || 'Erro ao criar agendamento');
       }
