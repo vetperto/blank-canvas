@@ -240,10 +240,9 @@ export function useSearchProfessionals() {
         }));
       } else {
         // === TEXT SEARCH: Fallback to public_search_professionals view ===
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let query = (supabase
-          .from("public_search_professionals" as any)
-          .select("*") as any);
+        let query = supabase
+          .from("public_search_professionals")
+          .select("*");
 
         if (filters.location && filters.location !== "Minha localização atual") {
           const searchTerm = filters.location.toLowerCase().trim().split(",")[0]?.trim();

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { PublicSearchProfessional } from "@/lib/search/public-professional";
 
 export interface FeaturedProfessional {
   id: string;
@@ -30,25 +29,26 @@ export function useFeaturedProfessionals(limit: number = 4) {
 
       try {
         // Query public_search_professionals view (already filters verified + active)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: rawProfiles, error: profilesError } = await (supabase
-          .from("public_search_professionals" as any)
-          .select("*") as any)
+        const { data: profiles, error: profilesError } = await supabase
+          .from("public_search_professionals")
+          .select("*")
           .not("full_name", "is", null)
           .not("city", "is", null)
           .limit(20);
 
         if (profilesError) throw profilesError;
 
-        const profiles = (rawProfiles ?? []) as PublicSearchProfessional[];
+        const validProfiles = (profiles ?? []).filter(
+          (p): p is typeof p & { id: string } => p.id != null
+        );
 
-        if (profiles.length === 0) {
+        if (validProfiles.length === 0) {
           setProfessionals([]);
           return;
         }
 
         const professionalsWithRatings = await Promise.all(
-          profiles.map(async (profile) => {
+          validProfiles.map(async (profile) => {
             const { data: ratingData } = await supabase
               .rpc("get_professional_rating", {
                 _professional_profile_id: profile.id,
