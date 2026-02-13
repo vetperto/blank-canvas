@@ -39,6 +39,10 @@ export interface ProfessionalResult {
   state?: string;
   neighborhood?: string;
   homeServiceRadius?: number;
+  /** From PostGIS ST_Y — for map display only, never for distance calc */
+  latitude?: number;
+  /** From PostGIS ST_X — for map display only, never for distance calc */
+  longitude?: number;
   locationTypes?: string[];
   petTypes?: string[];
   paymentMethods?: string[];

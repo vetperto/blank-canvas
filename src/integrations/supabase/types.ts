@@ -2431,6 +2431,8 @@ export type Database = {
               home_service_radius: number
               id: string
               is_verified: boolean
+              latitude: number
+              longitude: number
               neighborhood: string
               payment_methods: string[]
               profile_picture_url: string
